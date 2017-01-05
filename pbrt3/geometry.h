@@ -100,12 +100,12 @@ template < typename T > inline Vector2< T > Abs( const Vector2< T >& v )
     return Vector2< T >( std::abs( v.x ), std::abs( v.y ) );
 }
 
-template < typename T > inline Vector2< T > Dot( const Vector2< T >& v1, const Vector2< T >& v2 )
+template < typename T > inline T Dot( const Vector2< T >& v1, const Vector2< T >& v2 )
 {
     return v1.x * v2.x + v1.y * v2.y;
 }
 
-template < typename T > inline Vector2< T > AbsDot( const Vector2< T >& v1, const Vector2< T >& v2 )
+template < typename T > inline T AbsDot( const Vector2< T >& v1, const Vector2< T >& v2 )
 {
     return std::abs( Dot( v1, v2 ) );
 }
@@ -139,6 +139,9 @@ template < typename T > Vector2< T > Permute( const Vector2< T >& v, int x, int 
 
 // Vector3 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+// forward-declaration of Normal3 (see below)
+template < typename T > struct Normal3;
+
 template < typename T > struct Vector3
 {
     T x, y, z;
@@ -148,6 +151,8 @@ template < typename T > struct Vector3
     {
         // Assert( ! HasNaNs() );
     }
+
+    Vector3( const Normal3< T >& n );
 
     T operator[]( int i ) const
     {
@@ -230,12 +235,12 @@ template < typename T > inline Vector3< T > Abs( const Vector3< T >& v )
     return Vector3< T >( std::abs( v.x ), std::abs( v.y ), std::abs( v.z ) );
 }
 
-template < typename T > inline Vector3< T > Dot( const Vector3< T >& v1, const Vector3< T >& v2 )
+template < typename T > inline T Dot( const Vector3< T >& v1, const Vector3< T >& v2 )
 {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
-template < typename T > inline Vector3< T > AbsDot( const Vector3< T >& v1, const Vector3< T >& v2 )
+template < typename T > inline T AbsDot( const Vector3< T >& v1, const Vector3< T >& v2 )
 {
     return std::abs( Dot( v1, v2 ) );
 }
@@ -293,11 +298,6 @@ inline void CoordinateSystem( const Vector3< T >& v1, Vector3< T >* v2, Vector3<
         *v2 = Vector3< T >( 0, v1.z, -v1.y ) / std::sqrt( v1.y * v1.y + v1.z * v1.z );
     *v3 = Cross( v1, *v2 );
 }
-
-typedef Vector2< Float > Vector2f;
-typedef Vector2< int > Vector2i;
-typedef Vector3< Float > Vector3f;
-typedef Vector3< int > Vector3i;
 
 // Point3 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -544,9 +544,146 @@ template < typename T > Point2< T > Permute( const Point2< T >& p, int x, int y 
     return Point2< T >( p[ x ], p[ y ] );
 }
 
+// Normal  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template < typename T > struct Normal3
+{
+    T x, y, z;
+    Normal3() : x{ 0 }, y{ 0 }, z{ 0 } {}
+    Normal3( T x, T y, T z ) : x{ x }, y{ y }, z{ z }
+    {
+        // Assert( ! HasNaNs() );
+    }
+    explicit Normal3( const Vector3< T >& v ) : x{ v.x }, y{ v.y }, z{ v.z }
+    {
+        // Assert( ! HasNaNs() );
+    }
+
+    Normal3< T > operator+( const Normal3< T >& n ) const
+    {
+        return Normal3( x + n.x, y + n.y, z + n.z );
+    }
+
+    Normal3< T >& operator+=( const Normal3< T >& n )
+    {
+        x += n.x;
+        y += n.y;
+        z += n.z;
+        return *this;
+    }
+
+    Normal3< T > operator-( const Normal3< T >& n ) const
+    {
+        return Normal3( x - n.x, y - n.y, z - n.z );
+    }
+
+    Normal3< T >& operator-=( const Normal3< T >& n )
+    {
+        x -= n.x;
+        y -= n.y;
+        z -= n.z;
+        return *this;
+    }
+
+    Normal3< T > operator-() { return Normal3( -x, -y, -z ); }
+
+    Normal3< T > operator*( T s ) const { return Normal3( s * x, s * y, s * z ); }
+
+    Normal3< T >& operator*=( T s )
+    {
+        x *= s;
+        y *= s;
+        z *= s;
+        return *this;
+    }
+
+    Float LengthSquared() const { return x * x + y * y + z * z; }
+
+    Float Length() const { return std::sqrt( LengthSquared() ); }
+};
+
+template < typename T > inline Normal3< T > operator*( T s, Normal3< T >& n ) { return n * s; }
+
+template < typename T > inline Normal3< T > Normalize( const Normal3< T >& n )
+{
+    Float inv = static_cast< Float >( 1.0 ) / n.Length();
+    return n * inv;
+}
+
+template < typename T > inline Normal3< T > Abs( const Normal3< T >& n )
+{
+    return Normal3< T >( std::abs( n.x ), std::abs( n.y ), std::abs( n.z ) );
+}
+
+template < typename T > inline T Dot( const Normal3< T >& n1, const Normal3< T >& n2 )
+{
+    return n1.x * n2.x + n1.y * n2.y + n1.z * n2.z;
+}
+
+template < typename T > inline T Dot( const Normal3< T >& n, const Vector3< T >& v )
+{
+    return n.x * v.x + n.y * v.y + n.z * v.z;
+}
+
+template < typename T > inline T Dot( const Vector3< T >& v, const Normal3< T >& n )
+{
+    return v.x * n.x + v.y * n.y + v.z * n.z;
+}
+
+template < typename T > inline T AbsDot( const Normal3< T >& n1, const Normal3< T >& n2 )
+{
+    return std::abs( Dot( n1, n2 ) );
+}
+
+template < typename T > inline T AbsDot( const Normal3< T >& n, const Vector3< T >& v )
+{
+    return std::abs( Dot( n, v ) );
+}
+
+template < typename T > inline T AbsDot( const Vector3< T >& v, const Normal3< T >& n )
+{
+    return std::abs( Dot( v, n ) );
+}
+
+template < typename T >
+inline Vector3< T >::Vector3( const Normal3< T >& n ) : x{ n.x }, y{ n.y }, z{ n.z }
+{
+    // Assert( ! n.HasNaNs() );
+}
+
+template < typename T >
+inline Normal3< T > FaceForward( const Normal3< T >& n, const Vector3< T >& v )
+{
+    return ( Dot( n, v ) < 0.f ) ? -n : n;
+}
+
+template < typename T >
+inline Normal3< T > FaceForward( const Vector3< T >& v, const Normal3< T >& n )
+{
+    return ( Dot( n, v ) < 0.f ) ? -n : n;
+}
+
+template < typename T >
+inline Vector3< T > FaceForward( const Vector3< T >& v1, const Vector3< T >& v2 )
+{
+    return ( Dot( v1, v2 ) < 0.f ) ? -v1 : v1;
+}
+
+template < typename T >
+inline Normal3< T > FaceForward( const Normal3< T >& n1, const Normal3< T >& n2 )
+{
+    return ( Dot( n1, n2 ) < 0.f ) ? -n1 : n1;
+}
+
+/// Typedefs of common geometry types:
+typedef Vector2< Float > Vector2f;
+typedef Vector2< int > Vector2i;
+typedef Vector3< Float > Vector3f;
+typedef Vector3< int > Vector3i;
 typedef Point2< Float > Point2f;
 typedef Point2< int > Point2i;
 typedef Point3< Float > Point3f;
 typedef Point3< int > Point3i;
+typedef Normal3< Float > Normal3f;
 
 #endif /* geometry_h */
