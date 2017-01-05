@@ -9,6 +9,7 @@
 #ifndef geometry_h
 #define geometry_h
 
+#include <algorithm>
 #include <cmath>
 
 using Float = float;
@@ -37,7 +38,7 @@ template < typename T > struct Vector2
         return Vector2< T >( x + v.x, y + v.y );
     }
 
-    Vector2< T > operator+=( const Vector2< T >& v )
+    Vector2< T >& operator+=( const Vector2< T >& v )
     {
         x += v.x;
         y += v.y;
@@ -49,7 +50,7 @@ template < typename T > struct Vector2
         return Vector2< T >( x - v.x, y - v.y );
     }
 
-    Vector2< T > operator-=( const Vector2< T >& v )
+    Vector2< T >& operator-=( const Vector2< T >& v )
     {
         x -= v.x;
         y -= v.y;
@@ -58,7 +59,7 @@ template < typename T > struct Vector2
 
     Vector2< T > operator*( T s ) const { return Vector2< T >( s * x, s * y ); }
 
-    Vector2< T > operator*=( T s )
+    Vector2< T >& operator*=( T s )
     {
         x *= s;
         y *= s;
@@ -71,7 +72,7 @@ template < typename T > struct Vector2
         return Vector2< T >( x * inv, y * inv );
     }
 
-    Vector2< T > operator/=( T s )
+    Vector2< T >& operator/=( T s )
     {
         Float inv = static_cast< Float >( 1.0 ) / s;
         x *= inv;
@@ -85,7 +86,7 @@ template < typename T > struct Vector2
     Float Length() const { return std::sqrt( LengthSquared() ); }
 
   private:
-    bool HasNaNs() { return std::isnan( x ) || std::isnan( y ); }
+    bool HasNaNs() const { return std::isnan( x ) || std::isnan( y ); }
 };
 
 // Numerical Ops, Vector2
@@ -215,7 +216,7 @@ template < typename T > struct Vector3
     Float Length() const { return std::sqrt( LengthSquared() ); }
 
   private:
-    bool HasNaNs() { return std::isnan( x ) || std::isnan( y ) || std::isnan( z ); }
+    bool HasNaNs() const { return std::isnan( x ) || std::isnan( y ) || std::isnan( z ); }
 };
 
 // Numerical Ops, Vector3
@@ -292,5 +293,260 @@ inline void CoordinateSystem( const Vector3< T >& v1, Vector3< T >* v2, Vector3<
         *v2 = Vector3< T >( 0, v1.z, -v1.y ) / std::sqrt( v1.y * v1.y + v1.z * v1.z );
     *v3 = Cross( v1, *v2 );
 }
+
+typedef Vector2< Float > Vector2f;
+typedef Vector2< int > Vector2i;
+typedef Vector3< Float > Vector3f;
+typedef Vector3< int > Vector3i;
+
+// Point3 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template < typename T > struct Point3
+{
+    T x, y, z;
+
+    Point3() : x{ 0 }, y{ 0 }, z{ 0 } {}
+    Point3( T x, T y, T z ) : x{ x }, y{ y }, z{ z }
+    {
+        // Assert( ! HasNaNs() );
+    }
+
+    template < typename U >
+    explicit Point3( const Point3< U >& p )
+    : x{ static_cast< T >( p.x ) }, y{ static_cast< T >( p.y ) }, z{ static_cast< T >( p.z ) }
+    {
+        // Assert( ! HasNaNs() );
+    }
+
+    template < typename U > explicit operator Vector3< U >() const
+    {
+        return Vector3< U >( x, y, z );
+    }
+
+    Point3< T > operator+( const Vector3< T >& v ) const
+    {
+        return Point3< T >( x + v.x, y + v.y, z + v.z );
+    }
+
+    Point3< T >& operator+=( const Vector3< T >& v )
+    {
+        x += v.x;
+        y += v.y;
+        z += v.z;
+        return *this;
+    }
+
+    Point3< T > operator+( const Point3< T >& p ) const
+    {
+        return Point3< T >( x + p.x, y + p.y, z + p.z );
+    }
+
+    Point3< T >& operator+=( const Point3< T >& p )
+    {
+        x += p.x;
+        y += p.y;
+        z += p.z;
+        return *this;
+    }
+
+    Vector3< T > operator-( const Point3< T >& p ) const
+    {
+        return Vector3< T >( x - p.x, y - p.y, z - p.z );
+    }
+
+    Point3< T > operator-( const Vector3< T >& v ) const
+    {
+        return Point3< T >( x - v.x, y - v.y, z - v.z );
+    }
+
+    Point3< T >& operator-=( const Vector3< T >& v )
+    {
+        x -= v.x;
+        y -= v.y;
+        z -= v.z;
+        return *this;
+    }
+
+    Point3< T > operator*( T s ) const { return Point3< T >( s * x, s * y, s * z ); }
+
+    Point3< T >& operator*=( T s ) const
+    {
+        x *= s;
+        y *= s;
+        z *= s;
+        return *this;
+    }
+
+  private:
+    bool HasNaNs() const { return std::isnan( x ) || std::isnan( y ) || std::isnan( z ); }
+};
+
+template < typename T > inline float Distance( const Point3< T >& p1, const Point3< T >& p2 )
+{
+    return ( p1 - p2 ).Length();
+}
+
+template < typename T > inline float DistanceSquared( const Point3< T >& p1, const Point3< T >& p2 )
+{
+    return ( p1 - p2 ).LengthSquared();
+}
+
+template < typename T > inline Point3< T > operator*( T s, const Point3< T >& p ) { return p * s; }
+
+template < typename T > Point3< T > Lerp( Float t, const Point3< T >& p0, const Point3< T >& p1 )
+{
+    return ( 1 - t ) * p0 + ( p1 * t );
+}
+
+template < typename T > Point3< T > Min( const Point3< T >& p1, const Point3< T >& p2 )
+{
+    return Point3< T >( std::min( p1.x, p2.x ), std::min( p1.y, p2.y ), std::min( p1.z, p2.z ) );
+}
+
+template < typename T > Point3< T > Max( const Point3< T >& p1, const Point3< T >& p2 )
+{
+    return Point3< T >( std::max( p1.x, p2.x ), std::max( p1.y, p2.y ), std::max( p1.z, p2.z ) );
+}
+
+template < typename T > Point3< T > Floor( const Point3< T >& p )
+{
+    return Point3< T >( std::floor( p.x ), std::floor( p.y ), std::floor( p.z ) );
+}
+
+template < typename T > Point3< T > Ceil( const Point3< T >& p )
+{
+    return Point3< T >( std::ceil( p.x ), std::ceil( p.y ), std::ceil( p.z ) );
+}
+
+template < typename T > Point3< T > Abs( const Point3< T >& p )
+{
+    return Point3< T >( std::abs( p.x ), std::abs( p.y ), std::abs( p.z ) );
+}
+
+template < typename T > Point3< T > Permute( const Point3< T >& p, int x, int y, int z )
+{
+    return Point3< T >( p[ x ], p[ y ], p[ z ] );
+}
+
+// Point2 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template < typename T > struct Point2
+{
+    T x, y;
+
+    Point2() : x{ 0 }, y{ 0 } {}
+    Point2( T x, T y ) : x{ x }, y{ y }
+    {
+        // Assert( ! HasNaNs() );
+    }
+
+    explicit Point2( const Point3< T >& p ) : x{ p.x }, y{ p.y }
+    {
+        // Assert( ! HasNaNs() );
+    }
+
+    template < typename U >
+    explicit Point2( const Point2< U >& p )
+    : x{ static_cast< T >( p.x ) }, y{ static_cast< T >( p.y ) }
+    {
+        // Assert( ! HasNaNs() );
+    }
+
+    template < typename U > explicit operator Vector2< U >() const { return Vector2< U >( x, y ); }
+
+    Point2< T > operator+( const Vector2< T >& v ) const { return Point2< T >( x + v.x, y + v.y ); }
+
+    Point2< T >& operator+=( const Vector2< T >& v )
+    {
+        x += v.x;
+        y += v.y;
+        return *this;
+    }
+
+    Point2< T > operator+( const Point2< T >& p ) const { return Point2< T >( x + p.x, y + p.y ); }
+    Point2< T >& operator+=( const Point2< T >& p )
+    {
+        x += p.x;
+        y += p.y;
+        return *this;
+    }
+
+    Vector2< T > operator-( const Point2< T >& p ) const
+    {
+        return Vector2< T >( x - p.x, y - p.y );
+    }
+
+    Point2< T > operator-( const Vector2< T >& v ) const { return Point2< T >( x - v.x, y - v.y ); }
+
+    Point2< T >& operator-=( const Vector2< T >& v )
+    {
+        x -= v.x;
+        y -= v.y;
+        return *this;
+    }
+
+    Point2< T > operator*( T s ) { return Point2< T >( x * s, y * s ); }
+    Point2< T >& operator*=( T s )
+    {
+        x *= s;
+        y *= s;
+        return *this;
+    }
+
+  private:
+    bool HasNaNs() const { return std::isnan( x ) || std::isnan( y ); }
+};
+
+template < typename T > inline float Distance( const Point2< T >& p1, const Point2< T >& p2 )
+{
+    return ( p1 - p2 ).Length();
+}
+
+template < typename T > inline float DistanceSquared( const Point2< T >& p1, const Point2< T >& p2 )
+{
+    return ( p1 - p2 ).LengthSquared();
+}
+
+template < typename T > inline Point2< T > operator*( T s, const Point2< T >& p ) { return p * s; }
+
+template < typename T > Point2< T > Lerp( Float t, const Point2< T >& p0, const Point2< T >& p1 )
+{
+    return ( 1 - t ) * p0 + ( p1 * t );
+}
+
+template < typename T > Point2< T > Min( const Point2< T >& p1, const Point2< T >& p2 )
+{
+    return Point2< T >( std::min( p1.x, p2.x ), std::min( p1.y, p2.y ) );
+}
+
+template < typename T > Point2< T > Max( const Point2< T >& p1, const Point2< T >& p2 )
+{
+    return Point2< T >( std::max( p1.x, p2.x ), std::max( p1.y, p2.y ) );
+}
+
+template < typename T > Point2< T > Floor( const Point2< T >& p )
+{
+    return Point2< T >( std::floor( p.x ), std::floor( p.y ) );
+}
+
+template < typename T > Point2< T > Ceil( const Point2< T >& p )
+{
+    return Point2< T >( std::ceil( p.x ), std::ceil( p.y ) );
+}
+
+template < typename T > Point2< T > Abs( const Point2< T >& p )
+{
+    return Point2< T >( std::abs( p.x ), std::abs( p.y ) );
+}
+
+template < typename T > Point2< T > Permute( const Point2< T >& p, int x, int y )
+{
+    return Point2< T >( p[ x ], p[ y ] );
+}
+
+typedef Point2< Float > Point2f;
+typedef Point2< int > Point2i;
+typedef Point3< Float > Point3f;
+typedef Point3< int > Point3i;
 
 #endif /* geometry_h */
