@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9B0723911E1CE0EF00DBECCF /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0723901E1CE0EF00DBECCF /* main.cpp */; };
+		9B0723AE1E201B2D00DBECCF /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0723AC1E201B2D00DBECCF /* transform.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,7 +26,11 @@
 /* Begin PBXFileReference section */
 		9B07238D1E1CE0EF00DBECCF /* pbrt3 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pbrt3; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B0723901E1CE0EF00DBECCF /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		9B0723971E1E1F7800DBECCF /* geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
+		9B0723971E1E1F7800DBECCF /* geometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = geometry.hpp; sourceTree = "<group>"; };
+		9B0723AC1E201B2D00DBECCF /* transform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = transform.cpp; sourceTree = "<group>"; };
+		9B0723AD1E201B2D00DBECCF /* transform.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = transform.hpp; sourceTree = "<group>"; };
+		9B0723AF1E2023C900DBECCF /* pbrt.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pbrt.hpp; sourceTree = "<group>"; };
+		9B0723B01E2023F300DBECCF /* port.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = port.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,7 +64,11 @@
 			isa = PBXGroup;
 			children = (
 				9B0723901E1CE0EF00DBECCF /* main.cpp */,
-				9B0723971E1E1F7800DBECCF /* geometry.h */,
+				9B0723971E1E1F7800DBECCF /* geometry.hpp */,
+				9B0723AC1E201B2D00DBECCF /* transform.cpp */,
+				9B0723AD1E201B2D00DBECCF /* transform.hpp */,
+				9B0723AF1E2023C900DBECCF /* pbrt.hpp */,
+				9B0723B01E2023F300DBECCF /* port.hpp */,
 			);
 			path = pbrt3;
 			sourceTree = "<group>";
@@ -121,6 +130,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B0723AE1E201B2D00DBECCF /* transform.cpp in Sources */,
 				9B0723911E1CE0EF00DBECCF /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -248,6 +258,7 @@
 				9B0723961E1CE0EF00DBECCF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

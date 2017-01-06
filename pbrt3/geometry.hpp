@@ -6,8 +6,8 @@
 //  Copyright © 2017 Ilya Rostovtsev. All rights reserved.
 //
 
-#ifndef geometry_h
-#define geometry_h
+#ifndef geometry_hpp
+#define geometry_hpp
 
 #include <algorithm>
 #include <cmath>
@@ -1028,4 +1028,4 @@ class Bounds2iIterator : public std::forward_iterator_tag {
     }
 };
 
-#endif /* geometry_h */
+#endif /* geometry_hpp */
