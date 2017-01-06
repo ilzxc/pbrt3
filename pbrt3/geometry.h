@@ -380,6 +380,10 @@ template < typename T > struct Point3
         return *this;
     }
 
+    bool operator==( const Point3< T >& p ) const { return x == p.x && y == p.y && z == p.z; }
+
+    bool operator!=( const Point3< T >& p ) const { return x != p.x || y != p.y || z != p.z; }
+
   private:
     bool HasNaNs() const { return std::isnan( x ) || std::isnan( y ) || std::isnan( z ); }
 };
@@ -495,6 +499,10 @@ template < typename T > struct Point2
         y *= s;
         return *this;
     }
+
+    bool operator==( const Point2< T >& p ) const { return x == p.x && y == p.y; }
+
+    bool operator!=( const Point2< T >& p ) const { return x != p.x || y != p.y; }
 
   private:
     bool HasNaNs() const { return std::isnan( x ) || std::isnan( y ); }
@@ -916,8 +924,8 @@ template < typename T > struct Bounds3
 
     Point3< T > Lerp( const Point3f& t ) const
     {
-        return Point3< T >( Lerp( t.x, pMin.x, pMax.x ), Lerp( t.y, pMin.y, pMax.y ),
-                            Lerp( t.z, pMin.z, pMax.z ) );
+        return Point3< T >(::Lerp( t.x, pMin.x, pMax.x ), ::Lerp( t.y, pMin.y, pMax.y ),
+                           ::Lerp( t.z, pMin.z, pMax.z ) );
     }
 
     Vector3< T > Offset( const Point3< T >& p ) const
@@ -986,5 +994,38 @@ typedef Bounds2< Float > Bounds2f;
 typedef Bounds2< int > Bounds2i;
 typedef Bounds3< Float > Bounds3f;
 typedef Bounds3< int > Bounds3i;
+
+class Bounds2iIterator : public std::forward_iterator_tag {
+  public:
+    Bounds2iIterator( const Bounds2i& b, const Point2i& pt ) : p{ pt }, bounds{ &b } {}
+    Bounds2iIterator operator++()
+    {
+        advance();
+        return *this;
+    }
+    Bounds2iIterator operator++( int )
+    {
+        Bounds2iIterator old = *this;
+        advance();
+        return old;
+    }
+    bool operator==( const Bounds2iIterator& bi ) const { return p == bi.p && bounds == bi.bounds; }
+    bool operator!=( const Bounds2iIterator& bi ) const { return p != bi.p || bounds != bi.bounds; }
+
+    Point2i operator*() const { return p; }
+
+  private:
+    Point2i p;
+    const Bounds2i* bounds;
+
+    void advance()
+    {
+        ++p.x;
+        if ( p.x == bounds->pMax.x ) {
+            p.x = bounds->pMin.x;
+            ++p.y;
+        }
+    }
+};
 
 #endif /* geometry_h */
