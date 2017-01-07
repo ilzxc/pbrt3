@@ -13,8 +13,6 @@
 #include "pbrt.hpp"
 #include "stringprint.hpp"
 
-using Float = float;
-
 namespace pbrt {
 
 struct Matrix4x4
@@ -173,17 +171,7 @@ class Transform {
 
     Transform Translate( const Vector3f& delta ) const;
     Transform Scale( Float x, Float y, Float z ) const;
-
-    bool HasScale() const
-    {
-        Float la2 = ( *this )( Vector3f( 1, 0, 0 ) ).LengthSquared();
-        Float lb2 = ( *this )( Vector3f( 0, 1, 0 ) ).LengthSquared();
-        Float lc2 = ( *this )( Vector3f( 0, 0, 1 ) ).LengthSquared();
-#define NOT_ONE( x ) ( ( x ) < .999f || ( x ) > 1.001f )
-        return ( NOT_ONE( la2 ) || NOT_ONE( lb2 ) || NOT_ONE( lc2 ) );
-#undef NOT_ONE
-    }
-
+    bool HasScale() const;
     Transform RotateX( Float theta );
     Transform RotateY( Float theta );
     Transform RotateZ( Float theta );
@@ -360,7 +348,7 @@ class Transform {
         if ( lengthSquared > 0 ) {
             Float dt = Dot( Abs( d ), *oError ) / lengthSquared;
             o += d * dt;
-            //        tMax -= dt;
+            tMax -= dt;
         }
         return Ray( o, d, tMax, r.time, r.medium );
     }
@@ -381,16 +369,13 @@ class Transform {
     }
 
     Bounds3f operator()( const Bounds3f& b ) const;
-
-    Transform operator*( const Transform& t2 ) const
-    {
-        return Transform( Matrix4x4::Mul( m, t2.m ), Matrix4x4::Mul( t2.mInv, mInv ) );
-    }
+    Transform operator*( const Transform& t2 ) const;
 
     bool SwapsHandedness() const;
 
   private:
     Matrix4x4 m, mInv;
+    friend struct Quaternion;
 };
 
 } /* namespace pbrt */

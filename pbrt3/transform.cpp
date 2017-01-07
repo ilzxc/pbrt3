@@ -48,6 +48,16 @@ Transform Transform::Scale( Float x, Float y, Float z ) const
     return Transform( m, mInv );
 }
 
+bool Transform::HasScale() const
+{
+    Float la2 = ( *this )( Vector3f( 1, 0, 0 ) ).LengthSquared();
+    Float lb2 = ( *this )( Vector3f( 0, 1, 0 ) ).LengthSquared();
+    Float lc2 = ( *this )( Vector3f( 0, 0, 1 ) ).LengthSquared();
+#define NOT_ONE( x ) ( ( x ) < .999f || ( x ) > 1.001f )
+    return ( NOT_ONE( la2 ) || NOT_ONE( lb2 ) || NOT_ONE( lc2 ) );
+#undef NOT_ONE
+}
+
 Transform Transform::RotateX( Float theta )
 {
     Float sinTheta = std::sin( Radians( theta ) );
@@ -126,4 +136,17 @@ Transform Transform::LookAt( const Point3f& pos, const Point3f& look, const Vect
     cameraToWorld.m[ 3 ][ 3 ] = 1;
 
     return Transform( Inverse( cameraToWorld ), cameraToWorld );
+}
+
+Transform Transform::operator*( const Transform& t2 ) const
+{
+    return Transform( Matrix4x4::Mul( m, t2.m ), Matrix4x4::Mul( t2.mInv, mInv ) );
+}
+
+bool Transform::SwapsHandedness() const
+{
+    Float det = m.m[ 0 ][ 0 ] * ( m.m[ 1 ][ 1 ] * m.m[ 2 ][ 2 ] - m.m[ 1 ][ 2 ] * m.m[ 2 ][ 1 ] ) -
+                m.m[ 0 ][ 1 ] * ( m.m[ 1 ][ 0 ] * m.m[ 2 ][ 2 ] - m.m[ 1 ][ 2 ] * m.m[ 2 ][ 0 ] ) +
+                m.m[ 0 ][ 2 ] * ( m.m[ 1 ][ 0 ] * m.m[ 2 ][ 1 ] - m.m[ 1 ][ 1 ] * m.m[ 2 ][ 0 ] );
+    return det < 0;
 }

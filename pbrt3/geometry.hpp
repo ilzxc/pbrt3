@@ -10,14 +10,8 @@
 #define geometry_hpp
 
 #include "pbrt.hpp"
-//#include <algorithm>
-//#include <cmath>
 
 namespace pbrt {
-
-using Float = float;
-// Float Infinity = std::numeric_limits< Float >::infinity();
-// inline Float Lerp( Float t, Float v1, Float v2 ) { return ( 1 - t ) * v1 + t * v2; }
 
 // Vector2 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

@@ -15,6 +15,7 @@
 		9B0723BD1E205FB700DBECCF /* memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0723BB1E205FB700DBECCF /* memory.cpp */; };
 		9B0723C01E205FC000DBECCF /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0723BE1E205FC000DBECCF /* stats.cpp */; };
 		9B0724501E2069FE00DBECCF /* libglog.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B07244F1E2069FE00DBECCF /* libglog.dylib */; };
+		9B0724551E20CAEA00DBECCF /* quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0724531E20CAEA00DBECCF /* quaternion.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -49,6 +50,8 @@
 		9B0723BE1E205FC000DBECCF /* stats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stats.cpp; sourceTree = "<group>"; };
 		9B0723BF1E205FC000DBECCF /* stats.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = stats.hpp; sourceTree = "<group>"; };
 		9B07244F1E2069FE00DBECCF /* libglog.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglog.dylib; path = ../../../../../../usr/local/lib/libglog.dylib; sourceTree = "<group>"; };
+		9B0724531E20CAEA00DBECCF /* quaternion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = quaternion.cpp; sourceTree = "<group>"; };
+		9B0724541E20CAEA00DBECCF /* quaternion.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = quaternion.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +105,8 @@
 			children = (
 				9B0724521E2070D000DBECCF /* imported */,
 				9B0723971E1E1F7800DBECCF /* geometry.hpp */,
+				9B0724531E20CAEA00DBECCF /* quaternion.cpp */,
+				9B0724541E20CAEA00DBECCF /* quaternion.hpp */,
 				9B0723AC1E201B2D00DBECCF /* transform.cpp */,
 				9B0723AD1E201B2D00DBECCF /* transform.hpp */,
 			);
@@ -190,6 +195,7 @@
 				9B0723AE1E201B2D00DBECCF /* transform.cpp in Sources */,
 				9B0723BD1E205FB700DBECCF /* memory.cpp in Sources */,
 				9B0723B71E205EE100DBECCF /* progressreporter.cpp in Sources */,
+				9B0724551E20CAEA00DBECCF /* quaternion.cpp in Sources */,
 				9B0723911E1CE0EF00DBECCF /* main.cpp in Sources */,
 				9B0723B41E205E8C00DBECCF /* error.cpp in Sources */,
 			);
