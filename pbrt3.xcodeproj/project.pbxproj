@@ -16,6 +16,7 @@
 		9B0723C01E205FC000DBECCF /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0723BE1E205FC000DBECCF /* stats.cpp */; };
 		9B0724501E2069FE00DBECCF /* libglog.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B07244F1E2069FE00DBECCF /* libglog.dylib */; };
 		9B0724551E20CAEA00DBECCF /* quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0724531E20CAEA00DBECCF /* quaternion.cpp */; };
+		9B0724581E21656C00DBECCF /* shape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0724561E21656C00DBECCF /* shape.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -52,6 +53,8 @@
 		9B07244F1E2069FE00DBECCF /* libglog.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglog.dylib; path = ../../../../../../usr/local/lib/libglog.dylib; sourceTree = "<group>"; };
 		9B0724531E20CAEA00DBECCF /* quaternion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = quaternion.cpp; sourceTree = "<group>"; };
 		9B0724541E20CAEA00DBECCF /* quaternion.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = quaternion.hpp; sourceTree = "<group>"; };
+		9B0724561E21656C00DBECCF /* shape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shape.cpp; sourceTree = "<group>"; };
+		9B0724571E21656C00DBECCF /* shape.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = shape.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +112,8 @@
 				9B0724541E20CAEA00DBECCF /* quaternion.hpp */,
 				9B0723AC1E201B2D00DBECCF /* transform.cpp */,
 				9B0723AD1E201B2D00DBECCF /* transform.hpp */,
+				9B0724561E21656C00DBECCF /* shape.cpp */,
+				9B0724571E21656C00DBECCF /* shape.hpp */,
 			);
 			name = core;
 			sourceTree = "<group>";
@@ -191,6 +196,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B0723BA1E205F5D00DBECCF /* parallel.cpp in Sources */,
+				9B0724581E21656C00DBECCF /* shape.cpp in Sources */,
 				9B0723C01E205FC000DBECCF /* stats.cpp in Sources */,
 				9B0723AE1E201B2D00DBECCF /* transform.cpp in Sources */,
 				9B0723BD1E205FB700DBECCF /* memory.cpp in Sources */,

@@ -322,6 +322,16 @@ template < typename T > struct Point3
         return Vector3< U >( x, y, z );
     }
 
+    T operator[]( int i ) const
+    {
+        // Assert( i >= 0 && i < 3 );
+        if ( i == 0 )
+            return x;
+        if ( i == 1 )
+            return y;
+        return z;
+    }
+
     Point3< T > operator+( const Vector3< T >& v ) const
     {
         return Point3< T >( x + v.x, y + v.y, z + v.z );
@@ -471,6 +481,14 @@ template < typename T > struct Point2
     }
 
     template < typename U > explicit operator Vector2< U >() const { return Vector2< U >( x, y ); }
+
+    T operator[]( int i ) const
+    {
+        // Assert( i >= 0 && i < 2 );
+        if ( i == 0 )
+            return x;
+        return y;
+    }
 
     Point2< T > operator+( const Vector2< T >& v ) const { return Point2< T >( x + v.x, y + v.y ); }
 
@@ -970,6 +988,35 @@ template < typename T > struct Bounds3
         *center = ( pMin + pMax ) / 2;
         *radius = Inside( *center, *this ) ? Distance( *center, pMax ) : 0;
     }
+
+    inline bool IntersectP( const Ray& ray, Float* hitt0, Float* hitt1 ) const
+    {
+        Float t0 = 0, t1 = ray.tMax;
+        for ( auto i = 0; i < 3; ++i ) {
+            // update information for ith bounding box slab
+            Float invRayDir = static_cast< Float >( 1 ) / ray.d[ i ];
+            Float tNear = ( pMin[ i ] - ray.o[ i ] ) * invRayDir;
+            Float tFar = ( pMax[ i ] - ray.o[ i ] ) * invRayDir;
+
+            // update parametric interval from slab intersection t values
+            if ( tNear > tFar )
+                std::swap( tNear, tFar );
+
+            // update tFar to ensure robust ray-bounds intersection
+            tFar *= 1 + 2 * gamma( 3 );
+            t0 = tNear > t0 ? tNear : t0;
+            t1 = tFar < t1 ? tFar : t1;
+            if ( t0 > t1 )
+                return false;
+        }
+        if ( hitt0 )
+            *hitt0 = t0;
+        if ( hitt1 )
+            *hitt1 = t1;
+        return true;
+    }
+
+    inline bool IntersectP( const Ray& ray, const Vector3f& invDir, const int dirIsNeg[ 3 ] ) const;
 };
 
 template < typename T > Bounds3< T > Union( const Bounds3< T >& b, const Point3< T >& p )
@@ -1019,6 +1066,42 @@ typedef Bounds2< Float > Bounds2f;
 typedef Bounds2< int > Bounds2i;
 typedef Bounds3< Float > Bounds3f;
 typedef Bounds3< int > Bounds3i;
+
+template < typename T >
+inline bool Bounds3< T >::IntersectP( const pbrt::Ray& ray, const Vector3f& invDir,
+                                      const int* dirIsNeg ) const
+{
+    const Bounds3f& bounds = *this;
+    // check for ray intersection against x and y slabs
+    Float tMin = ( bounds[ dirIsNeg[ 0 ] ].x - ray.o.x ) * invDir.x;
+    Float tMax = ( bounds[ 1 - dirIsNeg[ 0 ] ].x - ray.o.x ) * invDir.x;
+    Float tyMin = ( bounds[ dirIsNeg[ 1 ] ].y - ray.o.y ) * invDir.y;
+    Float tyMax = ( bounds[ 1 - dirIsNeg[ 1 ] ].y - ray.o.y ) * invDir.y;
+
+    // update tMax and tyMax to ensure robust bounds intersection
+    tMax *= 1 + 2 * gamma( 3 );
+    tyMax *= 1 + 2 * gamma( 3 );
+    if ( tMin > tyMax || tyMin > tMax )
+        return false;
+    if ( tyMin > tMin )
+        tMin = tyMin;
+    if ( tyMax < tMax )
+        tMax = tyMax;
+
+    // check for ray intersection against z slab
+    Float tzMin = ( bounds[ dirIsNeg[ 2 ] ].z - ray.o.z ) * invDir.z;
+    Float tzMax = ( bounds[ 1 - dirIsNeg[ 2 ] ].z - ray.o.z ) * invDir.z;
+
+    tzMax *= 1 + 2 * gamma( 3 );
+    if ( tMin > tzMax || tzMin > tMax )
+        return false;
+    if ( tzMin > tMin )
+        tMin = tzMin;
+    if ( tzMax < tMax )
+        tMax = tzMax;
+
+    return ( tMin < ray.tMax ) && ( tMax > 0 );
+}
 
 class Bounds2iIterator : public std::forward_iterator_tag {
   public:
