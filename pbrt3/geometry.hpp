@@ -9,13 +9,15 @@
 #ifndef geometry_hpp
 #define geometry_hpp
 
-#include <algorithm>
-#include <cmath>
+#include "pbrt.hpp"
+//#include <algorithm>
+//#include <cmath>
+
+namespace pbrt {
 
 using Float = float;
-Float Infinity = std::numeric_limits< Float >::infinity();
-
-inline Float Lerp( Float t, Float v1, Float v2 ) { return ( 1 - t ) * v1 + t * v2; }
+// Float Infinity = std::numeric_limits< Float >::infinity();
+// inline Float Lerp( Float t, Float v1, Float v2 ) { return ( 1 - t ) * v1 + t * v2; }
 
 // Vector2 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -380,6 +382,21 @@ template < typename T > struct Point3
         return *this;
     }
 
+    Point3< T > operator/( T s )
+    {
+        auto inv = static_cast< T >( 1 ) / s;
+        return Point3< T >( inv * x, inv * y, inv * z );
+    }
+
+    Point3< T >& operator/=( T s )
+    {
+        auto inv = static_cast< T >( 1 ) / s;
+        x *= inv;
+        y *= inv;
+        z *= inv;
+        return ( *this );
+    }
+
     bool operator==( const Point3< T >& p ) const { return x == p.x && y == p.y && z == p.z; }
 
     bool operator!=( const Point3< T >& p ) const { return x != p.x || y != p.y || z != p.z; }
@@ -498,6 +515,20 @@ template < typename T > struct Point2
         x *= s;
         y *= s;
         return *this;
+    }
+
+    Point2< T > operator/( T s )
+    {
+        auto inv = static_cast< T >( 1 ) / s;
+        return Point2< T >( inv * x, inv * y );
+    }
+
+    Point2< T >& operator/=( T s )
+    {
+        auto inv = static_cast< T >( 1 ) / s;
+        x *= inv;
+        y *= inv;
+        return ( *this );
     }
 
     bool operator==( const Point2< T >& p ) const { return x == p.x && y == p.y; }
@@ -924,8 +955,8 @@ template < typename T > struct Bounds3
 
     Point3< T > Lerp( const Point3f& t ) const
     {
-        return Point3< T >(::Lerp( t.x, pMin.x, pMax.x ), ::Lerp( t.y, pMin.y, pMax.y ),
-                           ::Lerp( t.z, pMin.z, pMax.z ) );
+        return Point3< T >( pbrt::Lerp( t.x, pMin.x, pMax.x ), pbrt::Lerp( t.y, pMin.y, pMax.y ),
+                            pbrt::Lerp( t.z, pMin.z, pMax.z ) );
     }
 
     Vector3< T > Offset( const Point3< T >& p ) const
@@ -1027,5 +1058,7 @@ class Bounds2iIterator : public std::forward_iterator_tag {
         }
     }
 };
+
+} /* namespace pbrt */
 
 #endif /* geometry_hpp */

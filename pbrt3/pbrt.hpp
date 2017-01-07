@@ -39,10 +39,10 @@
 #define PBRT_CORE_PBRT_H
 
 // core/pbrt.h*
-#include "port.h"
+#include "port.hpp"
 
 // Global Include Files
-#include "error.h"
+#include "error.hpp"
 #include <algorithm>
 #include <cinttypes>
 #include <cmath>

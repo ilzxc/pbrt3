@@ -9,9 +9,13 @@
 #ifndef transform_hpp
 #define transform_hpp
 
+#include "geometry.hpp"
 #include "pbrt.hpp"
+#include "stringprint.hpp"
 
 using Float = float;
+
+namespace pbrt {
 
 struct Matrix4x4
 {
@@ -24,7 +28,7 @@ struct Matrix4x4
           m[ 2 ][ 0 ] = m[ 2 ][ 1 ] = m[ 2 ][ 3 ] = m[ 3 ][ 0 ] = m[ 3 ][ 1 ] = m[ 3 ][ 2 ] = 0.f;
     }
 
-    Matrix4x4( Float mat[ 4 ][ 4 ] );
+    Matrix4x4( const Float mat[ 4 ][ 4 ] );
     Matrix4x4( Float t00, Float t01, Float t02, Float t03, Float t10, Float t11, Float t12,
                Float t13, Float t20, Float t21, Float t22, Float t23, Float t30, Float t31,
                Float t32, Float t33 );
@@ -58,7 +62,7 @@ struct Matrix4x4
                 if ( j != 3 )
                     fprintf( f, ", " );
             }
-            printf( f, " ]\n" );
+            fprintf( f, " ]\n" );
         }
     }
 
@@ -95,25 +99,14 @@ class Transform {
     Transform( const Matrix4x4& m ) : m{ m }, mInv{ Inverse( m ) } {}
     Transform( const Matrix4x4& m, const Matrix4x4& mInv ) : m{ m }, mInv{ mInv } {}
 
-    friend Transform Inverse( const Transform& t ) { return Transform( mInv, m ); }
+    friend Transform Inverse( const Transform& t ) { return Transform( t.mInv, t.m ); }
     friend Transform Transpose( const Transform& t )
     {
         return Transform( Transpose( t.m ), Transpose( t.mInv ) );
     }
 
-    Transform Translate( const Vector3f& delta ) const
-    {
-        Matrix4x4 m( 1, 0, 0, delta.x, 0, 1, 0, delta.y, 0, 0, 1, delta.z, 0, 0, 0, 1 );
-        Matrix4x4 mInv( 1, 0, 0, -delta.x, 0, 1, 0, -delta.y, 0, 0, 1, -delta.z, 0, 0, 0, 1 );
-        return Transform( m, mInv );
-    }
-
-    Transform Scale( Float x, Float y, Float z ) const
-    {
-        Matrix4x4 m( x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1 );
-        Matrix4x4 mInv = ( 1 / x, 0, 0, 0, 0, 1 / x, 0, 0, 0, 0, 1 / x, 0, 0, 0, 0, 1 );
-        return Transform( m, mInv );
-    }
+    Transform Translate( const Vector3f& delta ) const;
+    Transform Scale( Float x, Float y, Float z ) const;
 
     bool HasScale() const
     {
@@ -125,70 +118,214 @@ class Transform {
 #undef NOT_ONE
     }
 
-    Transform RotateX( Float theta )
+    Transform RotateX( Float theta );
+    Transform RotateY( Float theta );
+    Transform RotateZ( Float theta );
+    Transform Rotate( Float theta, const Vector3f& axis );
+    Transform LookAt( const Point3f& pos, const Point3f& look, const Vector3f& up ) const;
+
+    // Transform Inline Functions
+    template < typename T > inline Point3< T > operator()( const Point3< T >& p ) const
     {
-        Float sinTheta = std::sin( Radians( theta ) );
-        Float cosTheta = std::cos( Radians( theta ) );
-        Matrix4x4 m( 1, 0, 0, 0, 0, cosTheta, -sinTheta, 0, 0, sinTheta, cosTheta, 0, 0, 0, 0, 1 );
-        return Transform( m, Transpose( m ) );
+        T x = p.x, y = p.y, z = p.z;
+        T xp = m.m[ 0 ][ 0 ] * x + m.m[ 0 ][ 1 ] * y + m.m[ 0 ][ 2 ] * z + m.m[ 0 ][ 3 ];
+        T yp = m.m[ 1 ][ 0 ] * x + m.m[ 1 ][ 1 ] * y + m.m[ 1 ][ 2 ] * z + m.m[ 1 ][ 3 ];
+        T zp = m.m[ 2 ][ 0 ] * x + m.m[ 2 ][ 1 ] * y + m.m[ 2 ][ 2 ] * z + m.m[ 2 ][ 3 ];
+        T wp = m.m[ 3 ][ 0 ] * x + m.m[ 3 ][ 1 ] * y + m.m[ 3 ][ 2 ] * z + m.m[ 3 ][ 3 ];
+        CHECK_NE( wp, 0 );
+        if ( wp == 1 )
+            return Point3< T >( xp, yp, zp );
+        else
+            return Point3< T >( xp, yp, zp ) / wp;
     }
 
-    Transform RotateY( Float theta )
+    template < typename T > inline Vector3< T > operator()( const Vector3< T >& v ) const
     {
-        Float sinTheta = std::sin( Radians( theta ) );
-        Float cosTheta = std::cos( Radians( theta ) );
-        Matrix4x4 m( cosTheta, 0, sinTheta, 0, 0, 1, 0, 0 - sinTheta, 0, cosTheta, 0, 0, 0, 0, 1 );
-        return Transform( m, Transpose( m ) );
+        T x = v.x, y = v.y, z = v.z;
+        return Vector3< T >( m.m[ 0 ][ 0 ] * x + m.m[ 0 ][ 1 ] * y + m.m[ 0 ][ 2 ] * z,
+                             m.m[ 1 ][ 0 ] * x + m.m[ 1 ][ 1 ] * y + m.m[ 1 ][ 2 ] * z,
+                             m.m[ 2 ][ 0 ] * x + m.m[ 2 ][ 1 ] * y + m.m[ 2 ][ 2 ] * z );
     }
 
-    Transform RotateZ( Float theta )
+    template < typename T > inline Normal3< T > operator()( const Normal3< T >& n ) const
     {
-        Float sinTheta = std::sin( Radians( theta ) );
-        Float cosTheta = std::cos( Radians( theta ) );
-        Matrix4x4 m( cosTheta, -sinTheta, 0, 0, sinTheta, cosTheta, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 );
-        return Transform( m, Transpose( m ) );
+        T x = n.x, y = n.y, z = n.z;
+        return Normal3< T >( mInv.m[ 0 ][ 0 ] * x + mInv.m[ 1 ][ 0 ] * y + mInv.m[ 2 ][ 0 ] * z,
+                             mInv.m[ 0 ][ 1 ] * x + mInv.m[ 1 ][ 1 ] * y + mInv.m[ 2 ][ 1 ] * z,
+                             mInv.m[ 0 ][ 2 ] * x + mInv.m[ 1 ][ 2 ] * y + mInv.m[ 2 ][ 2 ] * z );
     }
 
-    Transform Rotate( Float theta, const Vector3f& axis )
+    inline Ray operator()( const Ray& r ) const
     {
-        Vector3f a = Normalize( axis );
-        Float sinTheta = std::sin( Radians( theta ) );
-        Float cosTheta = std::cos( Radians( theta ) );
-        Matrix4x4 m;
-
-        m.m[ 0 ][ 0 ] = a.x * a.x + ( 1 - a.x * a.x ) * cosTheta;
-        m.m[ 0 ][ 1 ] = a.x * a.y * ( 1 - cosTheta ) - a.z * sinTheta;
-        m.m[ 0 ][ 2 ] = a.x * a.z * ( 1 - cosTheta ) + a.y * sinTheta;
-        m.m[ 0 ][ 3 ] = 0;
-
-        m.m[ 1 ][ 0 ] = a.x * a.y * ( 1 - cosTheta ) + a.z * sinTheta;
-        m.m[ 1 ][ 1 ] = a.y * a.y + ( 1 - a.y * a.y ) * cosTheta;
-        m.m[ 1 ][ 2 ] = a.y * a.z * ( 1 - cosTheta ) - a.x * sinTheta;
-        m.m[ 1 ][ 3 ] = 0;
-
-        m.m[ 2 ][ 0 ] = a.x * a.z * ( 1 - cosTheta ) - a.y * sinTheta;
-        m.m[ 2 ][ 1 ] = a.y * a.z * ( 1 - cosTheta ) + a.x * sinTheta;
-        m.m[ 2 ][ 2 ] = a.z * a.z + ( 1 - a.z * a.z ) * cosTheta;
-        m.m[ 2 ][ 3 ] = 0;
-
-        return Transform( m, Transpose( m ) );
+        Vector3f oError;
+        Point3f o = ( *this )( r.o, &oError );
+        Vector3f d = ( *this )( r.d );
+        // Offset ray origin to edge of error bounds and compute _tMax_
+        Float lengthSquared = d.LengthSquared();
+        Float tMax = r.tMax;
+        if ( lengthSquared > 0 ) {
+            Float dt = Dot( Abs( d ), oError ) / lengthSquared;
+            o += d * dt;
+            tMax -= dt;
+        }
+        return Ray( o, d, tMax, r.time, r.medium );
     }
 
-    Transform LookAt( const Point3f& pos, const Point3f& look, const Vector3f& up )
+    inline RayDifferential operator()( const RayDifferential& r ) const
     {
-        Matrix4x4 cameraToWorld;
-
-        // fourth column:
-        cameraToWorld.m[ 0 ][ 3 ] = pos.x;
-        cameraToWorld.m[ 1 ][ 3 ] = pos.y;
-        cameraToWorld.m[ 2 ][ 3 ] = pos.z;
-        cameraToWorld.m[ 3 ][ 3 ] = 1;
-
-        // todo: other three columns!
+        Ray tr = ( *this )( Ray( r ) );
+        RayDifferential ret( tr.o, tr.d, tr.tMax, tr.time, tr.medium );
+        ret.hasDifferentials = r.hasDifferentials;
+        ret.rxOrigin = ( *this )( r.rxOrigin );
+        ret.ryOrigin = ( *this )( r.ryOrigin );
+        ret.rxDirection = ( *this )( r.rxDirection );
+        ret.ryDirection = ( *this )( r.ryDirection );
+        return ret;
     }
+
+    template < typename T >
+    inline Point3< T > operator()( const Point3< T >& p, Vector3< T >* pError ) const
+    {
+        T x = p.x, y = p.y, z = p.z;
+        // Compute transformed coordinates from point _pt_
+        T xp = m.m[ 0 ][ 0 ] * x + m.m[ 0 ][ 1 ] * y + m.m[ 0 ][ 2 ] * z + m.m[ 0 ][ 3 ];
+        T yp = m.m[ 1 ][ 0 ] * x + m.m[ 1 ][ 1 ] * y + m.m[ 1 ][ 2 ] * z + m.m[ 1 ][ 3 ];
+        T zp = m.m[ 2 ][ 0 ] * x + m.m[ 2 ][ 1 ] * y + m.m[ 2 ][ 2 ] * z + m.m[ 2 ][ 3 ];
+        T wp = m.m[ 3 ][ 0 ] * x + m.m[ 3 ][ 1 ] * y + m.m[ 3 ][ 2 ] * z + m.m[ 3 ][ 3 ];
+
+        // Compute absolute error for transformed point
+        T xAbsSum = ( std::abs( m.m[ 0 ][ 0 ] * x ) + std::abs( m.m[ 0 ][ 1 ] * y ) +
+                      std::abs( m.m[ 0 ][ 2 ] * z ) + std::abs( m.m[ 0 ][ 3 ] ) );
+        T yAbsSum = ( std::abs( m.m[ 1 ][ 0 ] * x ) + std::abs( m.m[ 1 ][ 1 ] * y ) +
+                      std::abs( m.m[ 1 ][ 2 ] * z ) + std::abs( m.m[ 1 ][ 3 ] ) );
+        T zAbsSum = ( std::abs( m.m[ 2 ][ 0 ] * x ) + std::abs( m.m[ 2 ][ 1 ] * y ) +
+                      std::abs( m.m[ 2 ][ 2 ] * z ) + std::abs( m.m[ 2 ][ 3 ] ) );
+        *pError = gamma( 3 ) * Vector3< T >( xAbsSum, yAbsSum, zAbsSum );
+        CHECK_NE( wp, 0 );
+        if ( wp == 1 )
+            return Point3< T >( xp, yp, zp );
+        else
+            return Point3< T >( xp, yp, zp ) / wp;
+    }
+
+    template < typename T >
+    inline Point3< T > operator()( const Point3< T >& pt, const Vector3< T >& ptError,
+                                   Vector3< T >* absError ) const
+    {
+        T x = pt.x, y = pt.y, z = pt.z;
+        T xp = m.m[ 0 ][ 0 ] * x + m.m[ 0 ][ 1 ] * y + m.m[ 0 ][ 2 ] * z + m.m[ 0 ][ 3 ];
+        T yp = m.m[ 1 ][ 0 ] * x + m.m[ 1 ][ 1 ] * y + m.m[ 1 ][ 2 ] * z + m.m[ 1 ][ 3 ];
+        T zp = m.m[ 2 ][ 0 ] * x + m.m[ 2 ][ 1 ] * y + m.m[ 2 ][ 2 ] * z + m.m[ 2 ][ 3 ];
+        T wp = m.m[ 3 ][ 0 ] * x + m.m[ 3 ][ 1 ] * y + m.m[ 3 ][ 2 ] * z + m.m[ 3 ][ 3 ];
+        absError->x = ( gamma( 3 ) + ( T )1 ) * ( std::abs( m.m[ 0 ][ 0 ] ) * ptError.x +
+                                                  std::abs( m.m[ 0 ][ 1 ] ) * ptError.y +
+                                                  std::abs( m.m[ 0 ][ 2 ] ) * ptError.z ) +
+                      gamma( 3 ) * ( std::abs( m.m[ 0 ][ 0 ] * x ) + std::abs( m.m[ 0 ][ 1 ] * y ) +
+                                     std::abs( m.m[ 0 ][ 2 ] * z ) + std::abs( m.m[ 0 ][ 3 ] ) );
+        absError->y = ( gamma( 3 ) + ( T )1 ) * ( std::abs( m.m[ 1 ][ 0 ] ) * ptError.x +
+                                                  std::abs( m.m[ 1 ][ 1 ] ) * ptError.y +
+                                                  std::abs( m.m[ 1 ][ 2 ] ) * ptError.z ) +
+                      gamma( 3 ) * ( std::abs( m.m[ 1 ][ 0 ] * x ) + std::abs( m.m[ 1 ][ 1 ] * y ) +
+                                     std::abs( m.m[ 1 ][ 2 ] * z ) + std::abs( m.m[ 1 ][ 3 ] ) );
+        absError->z = ( gamma( 3 ) + ( T )1 ) * ( std::abs( m.m[ 2 ][ 0 ] ) * ptError.x +
+                                                  std::abs( m.m[ 2 ][ 1 ] ) * ptError.y +
+                                                  std::abs( m.m[ 2 ][ 2 ] ) * ptError.z ) +
+                      gamma( 3 ) * ( std::abs( m.m[ 2 ][ 0 ] * x ) + std::abs( m.m[ 2 ][ 1 ] * y ) +
+                                     std::abs( m.m[ 2 ][ 2 ] * z ) + std::abs( m.m[ 2 ][ 3 ] ) );
+        CHECK_NE( wp, 0 );
+        if ( wp == 1. )
+            return Point3< T >( xp, yp, zp );
+        else
+            return Point3< T >( xp, yp, zp ) / wp;
+    }
+
+    template < typename T >
+    inline Vector3< T > operator()( const Vector3< T >& v, Vector3< T >* absError ) const
+    {
+        T x = v.x, y = v.y, z = v.z;
+        absError->x =
+          gamma( 3 ) * ( std::abs( m.m[ 0 ][ 0 ] * v.x ) + std::abs( m.m[ 0 ][ 1 ] * v.y ) +
+                         std::abs( m.m[ 0 ][ 2 ] * v.z ) );
+        absError->y =
+          gamma( 3 ) * ( std::abs( m.m[ 1 ][ 0 ] * v.x ) + std::abs( m.m[ 1 ][ 1 ] * v.y ) +
+                         std::abs( m.m[ 1 ][ 2 ] * v.z ) );
+        absError->z =
+          gamma( 3 ) * ( std::abs( m.m[ 2 ][ 0 ] * v.x ) + std::abs( m.m[ 2 ][ 1 ] * v.y ) +
+                         std::abs( m.m[ 2 ][ 2 ] * v.z ) );
+        return Vector3< T >( m.m[ 0 ][ 0 ] * x + m.m[ 0 ][ 1 ] * y + m.m[ 0 ][ 2 ] * z,
+                             m.m[ 1 ][ 0 ] * x + m.m[ 1 ][ 1 ] * y + m.m[ 1 ][ 2 ] * z,
+                             m.m[ 2 ][ 0 ] * x + m.m[ 2 ][ 1 ] * y + m.m[ 2 ][ 2 ] * z );
+    }
+
+    template < typename T >
+    inline Vector3< T > operator()( const Vector3< T >& v, const Vector3< T >& vError,
+                                    Vector3< T >* absError ) const
+    {
+        T x = v.x, y = v.y, z = v.z;
+        absError->x =
+          ( gamma( 3 ) + ( T )1 ) *
+            ( std::abs( m.m[ 0 ][ 0 ] ) * vError.x + std::abs( m.m[ 0 ][ 1 ] ) * vError.y +
+              std::abs( m.m[ 0 ][ 2 ] ) * vError.z ) +
+          gamma( 3 ) * ( std::abs( m.m[ 0 ][ 0 ] * v.x ) + std::abs( m.m[ 0 ][ 1 ] * v.y ) +
+                         std::abs( m.m[ 0 ][ 2 ] * v.z ) );
+        absError->y =
+          ( gamma( 3 ) + ( T )1 ) *
+            ( std::abs( m.m[ 1 ][ 0 ] ) * vError.x + std::abs( m.m[ 1 ][ 1 ] ) * vError.y +
+              std::abs( m.m[ 1 ][ 2 ] ) * vError.z ) +
+          gamma( 3 ) * ( std::abs( m.m[ 1 ][ 0 ] * v.x ) + std::abs( m.m[ 1 ][ 1 ] * v.y ) +
+                         std::abs( m.m[ 1 ][ 2 ] * v.z ) );
+        absError->z =
+          ( gamma( 3 ) + ( T )1 ) *
+            ( std::abs( m.m[ 2 ][ 0 ] ) * vError.x + std::abs( m.m[ 2 ][ 1 ] ) * vError.y +
+              std::abs( m.m[ 2 ][ 2 ] ) * vError.z ) +
+          gamma( 3 ) * ( std::abs( m.m[ 2 ][ 0 ] * v.x ) + std::abs( m.m[ 2 ][ 1 ] * v.y ) +
+                         std::abs( m.m[ 2 ][ 2 ] * v.z ) );
+        return Vector3< T >( m.m[ 0 ][ 0 ] * x + m.m[ 0 ][ 1 ] * y + m.m[ 0 ][ 2 ] * z,
+                             m.m[ 1 ][ 0 ] * x + m.m[ 1 ][ 1 ] * y + m.m[ 1 ][ 2 ] * z,
+                             m.m[ 2 ][ 0 ] * x + m.m[ 2 ][ 1 ] * y + m.m[ 2 ][ 2 ] * z );
+    }
+
+    inline Ray operator()( const Ray& r, Vector3f* oError, Vector3f* dError ) const
+    {
+        Point3f o = ( *this )( r.o, oError );
+        Vector3f d = ( *this )( r.d, dError );
+        Float tMax = r.tMax;
+        Float lengthSquared = d.LengthSquared();
+        if ( lengthSquared > 0 ) {
+            Float dt = Dot( Abs( d ), *oError ) / lengthSquared;
+            o += d * dt;
+            //        tMax -= dt;
+        }
+        return Ray( o, d, tMax, r.time, r.medium );
+    }
+
+    inline Ray operator()( const Ray& r, const Vector3f& oErrorIn, const Vector3f& dErrorIn,
+                           Vector3f* oErrorOut, Vector3f* dErrorOut ) const
+    {
+        Point3f o = ( *this )( r.o, oErrorIn, oErrorOut );
+        Vector3f d = ( *this )( r.d, dErrorIn, dErrorOut );
+        Float tMax = r.tMax;
+        Float lengthSquared = d.LengthSquared();
+        if ( lengthSquared > 0 ) {
+            Float dt = Dot( Abs( d ), *oErrorOut ) / lengthSquared;
+            o += d * dt;
+            //        tMax -= dt;
+        }
+        return Ray( o, d, tMax, r.time, r.medium );
+    }
+
+    Bounds3f operator()( const Bounds3f& b ) const;
+
+    Transform operator*( const Transform& t2 ) const
+    {
+        return Transform( Matrix4x4::Mul( m, t2.m ), Matrix4x4::Mul( t2.mInv, mInv ) );
+    }
+
+    bool SwapsHandedness() const;
 
   private:
     Matrix4x4 m, mInv;
 };
 
+} /* namespace pbrt */
 #endif /* transform_hpp */

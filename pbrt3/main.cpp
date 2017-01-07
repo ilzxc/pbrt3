@@ -6,8 +6,10 @@
 //  Copyright © 2017 Ilya Rostovtsev. All rights reserved.
 //
 
-#include "geometry.h"
+#include "transform.hpp"
 #include <iostream>
+
+using namespace pbrt;
 
 template < typename T > void pv( const Vector2< T >& v )
 {
