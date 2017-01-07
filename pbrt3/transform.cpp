@@ -10,6 +10,30 @@
 
 using namespace pbrt;
 
+Matrix4x4::Matrix4x4( const Float mat[ 4 ][ 4 ] ) { memcpy( m, mat, 16 * sizeof( Float ) ); }
+
+Matrix4x4::Matrix4x4( Float t00, Float t01, Float t02, Float t03, Float t10, Float t11, Float t12,
+                      Float t13, Float t20, Float t21, Float t22, Float t23, Float t30, Float t31,
+                      Float t32, Float t33 )
+{
+    m[ 0 ][ 0 ] = t00;
+    m[ 0 ][ 1 ] = t01;
+    m[ 0 ][ 2 ] = t02;
+    m[ 0 ][ 3 ] = t03;
+    m[ 1 ][ 0 ] = t10;
+    m[ 1 ][ 1 ] = t11;
+    m[ 1 ][ 2 ] = t12;
+    m[ 1 ][ 3 ] = t13;
+    m[ 2 ][ 0 ] = t20;
+    m[ 2 ][ 1 ] = t21;
+    m[ 2 ][ 2 ] = t22;
+    m[ 2 ][ 3 ] = t23;
+    m[ 3 ][ 0 ] = t30;
+    m[ 3 ][ 1 ] = t31;
+    m[ 3 ][ 2 ] = t32;
+    m[ 3 ][ 3 ] = t33;
+}
+
 Transform Transform::Translate( const Vector3f& delta ) const
 {
     Matrix4x4 m( 1, 0, 0, delta.x, 0, 1, 0, delta.y, 0, 0, 1, delta.z, 0, 0, 0, 1 );

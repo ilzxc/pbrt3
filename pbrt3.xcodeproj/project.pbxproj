@@ -83,12 +83,35 @@
 		9B07238F1E1CE0EF00DBECCF /* pbrt3 */ = {
 			isa = PBXGroup;
 			children = (
+				9B0724511E2070B400DBECCF /* core */,
 				9B0723901E1CE0EF00DBECCF /* main.cpp */,
+			);
+			path = pbrt3;
+			sourceTree = "<group>";
+		};
+		9B07244A1E20697400DBECCF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9B07244F1E2069FE00DBECCF /* libglog.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9B0724511E2070B400DBECCF /* core */ = {
+			isa = PBXGroup;
+			children = (
+				9B0724521E2070D000DBECCF /* imported */,
 				9B0723971E1E1F7800DBECCF /* geometry.hpp */,
 				9B0723AC1E201B2D00DBECCF /* transform.cpp */,
 				9B0723AD1E201B2D00DBECCF /* transform.hpp */,
+			);
+			name = core;
+			sourceTree = "<group>";
+		};
+		9B0724521E2070D000DBECCF /* imported */ = {
+			isa = PBXGroup;
+			children = (
 				9B0723AF1E2023C900DBECCF /* pbrt.hpp */,
-				9B0723B11E205E1300DBECCF /* stringprint.hpp */,
 				9B0723B01E2023F300DBECCF /* port.hpp */,
 				9B0723B21E205E8C00DBECCF /* error.cpp */,
 				9B0723B31E205E8C00DBECCF /* error.hpp */,
@@ -100,16 +123,9 @@
 				9B0723BC1E205FB700DBECCF /* memory.hpp */,
 				9B0723BE1E205FC000DBECCF /* stats.cpp */,
 				9B0723BF1E205FC000DBECCF /* stats.hpp */,
+				9B0723B11E205E1300DBECCF /* stringprint.hpp */,
 			);
-			path = pbrt3;
-			sourceTree = "<group>";
-		};
-		9B07244A1E20697400DBECCF /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				9B07244F1E2069FE00DBECCF /* libglog.dylib */,
-			);
-			name = Frameworks;
+			name = imported;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
