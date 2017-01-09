@@ -27,7 +27,7 @@ Sphere::Sphere( const Transform* ObjectToWorld, const Transform* WorldToObject,
 
 Bounds3f Sphere::ObjectBound() const
 {
-    return Bounds3f( Point3f( -radius, -radius, zMin ), Point3f( radius, radius, zMax ) );
+    return Bounds3f{ Point3f( -radius, -radius, zMin ), Point3f( radius, radius, zMax ) };
 }
 
 bool Sphere::Intersect( const Ray& r, Float* tHit, SurfaceInteraction* isect,
@@ -99,14 +99,38 @@ bool Sphere::Intersect( const Ray& r, Float* tHit, SurfaceInteraction* isect,
     Float theta = std::acos( Clamp( pHit.z / radius, -1, 1 ) );
     Float v = ( theta - thetaMin ) / ( thetaMax - thetaMin );
     // compute sphere dp/du and dp/dv partial derivatives
+    Float zRadius = std::sqrt( pHit.x * pHit.x + pHit.y * pHit.y );
+    Float invZRadius = static_cast< Float >( 1 ) / zRadius;
+    Float cosPhi = pHit.x * invZRadius;
+    Float sinPhi = pHit.y * invZRadius;
+    Vector3f dpdu( -phiMax * pHit.y, phiMax * pHit.x, 0 );
+    Vector3f dpdv = ( thetaMax - thetaMin ) *
+                    Vector3f( pHit.z * cosPhi, pHit.z * sinPhi, -radius * std::sin( theta ) );
     // compute sphere dn/du and dn/dv partial derivatives
-
+    Vector3f d2Pduu = -phiMax * phiMax * Vector3f( pHit.x, pHit.y, 0 );
+    Vector3f d2Pduv = ( thetaMax - thetaMin ) * pHit.z * phiMax * Vector3f( -sinPhi, cosPhi, 0 );
+    Vector3f d2Pdvv =
+      -( thetaMax - thetaMin ) * ( thetaMax - thetaMin ) * Vector3f( pHit.x, pHit.y, pHit.z );
+    // compute coefficients for fundamental forms
+    // compute dn/du and dn/dv from fundamental forms coefficients
+    Float E = Dot( dpdu, dpdu );
+    Float F = Dot( dpdu, dpdv );
+    Float G = Dot( dpdv, dpdv );
+    Vector3f N = Normalize( Cross( dpdu, dpdv ) );
+    Float e = Dot( N, d2Pduu );
+    Float f = Dot( N, d2Pduv );
+    Float g = Dot( N, d2Pdvv );
     // compute error bounds for sphere intersection
-
+    Float invEGF2 = static_cast< Float >( 1 ) / ( E * G - F * F );
+    Normal3f dndu =
+      Normal3f{ ( f * F - e * G ) * invEGF2 * dpdu + ( e * G - g * E ) * invEGF2 * dpdv };
+    Normal3f dndv =
+      Normal3f{ ( g * F - f * G ) * invEGF2 * dpdu + ( f * F - g * E ) * invEGF2 * dpdv };
     // initialize SurfaceInteraction from parametric information
-
+    *isect = ( *ObjectToWorld )( SurfaceInteraction{ pHit, pError, Point2f( u, v ), -ray.d, dpdu,
+                                                     dpdv, dndu, dndv, ray.time, this } );
     // update tHit for quadric intersection
-
+    *tHit = static_cast< Float >( tShapeHit );
     return true;
 }
 
