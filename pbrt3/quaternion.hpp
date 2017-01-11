@@ -48,6 +48,14 @@ struct Quaternion
         return ret -= q2;
     }
 
+    Quaternion operator-() const
+    {
+        Quaternion ret = *this;
+        ret.v = -v;
+        ret.w = -w;
+        return ret;
+    }
+
     Quaternion& operator*=( Float f )
     {
         v *= f;

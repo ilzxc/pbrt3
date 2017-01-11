@@ -11,6 +11,7 @@
 
 #include "geometry.hpp"
 #include "pbrt.hpp"
+#include "quaternion.hpp"
 #include "stringprint.hpp"
 
 namespace pbrt {
@@ -169,7 +170,13 @@ class Transform {
         return Transform( Transpose( t.m ), Transpose( t.mInv ) );
     }
 
-    Transform Translate( const Vector3f& delta ) const;
+    Transform Translate( const Vector3f& delta ) const
+    {
+        Matrix4x4 m( 1, 0, 0, delta.x, 0, 1, 0, delta.y, 0, 0, 1, delta.z, 0, 0, 0, 1 );
+        Matrix4x4 mInv( 1, 0, 0, -delta.x, 0, 1, 0, -delta.y, 0, 0, 1, -delta.z, 0, 0, 0, 1 );
+        return Transform( m, mInv );
+    }
+
     Transform Scale( Float x, Float y, Float z ) const;
     bool HasScale() const;
     Transform RotateX( Float theta );
@@ -370,12 +377,41 @@ class Transform {
 
     Bounds3f operator()( const Bounds3f& b ) const;
     Transform operator*( const Transform& t2 ) const;
+    bool operator==( const Transform& t2 ) const;
+    bool operator!=( const Transform& t2 ) const;
 
     bool SwapsHandedness() const;
 
   private:
     Matrix4x4 m, mInv;
     friend struct Quaternion;
+    friend class AnimatedTransform;
+};
+
+class AnimatedTransform {
+  public:
+    AnimatedTransform( const Transform* startTransform, Float startTime,
+                       const Transform* endTransform, Float endTime );
+
+    void Decompose( const Matrix4x4& m, Vector3f* T, Quaternion* R, Matrix4x4* S );
+    void Interpolate( Float time, Transform* t ) const;
+
+    Ray operator()( const Ray& r ) const;
+    RayDifferential operator()( const RayDifferential& r ) const;
+    Point3f operator()( const Point3f& p ) const;
+    Vector3f operator()( const Vector3f& v ) const;
+
+    Bounds3f MotionBounds( const Bounds3f& b ) const;
+
+  private:
+    const Transform* startTransform;
+    const Transform* endTransform;
+    const Float startTime, endTime;
+    const bool actuallyAnimated;
+    Vector3f T[ 2 ];
+    Quaternion R[ 2 ];
+    Matrix4x4 S[ 2 ];
+    bool hasRotation;
 };
 
 } /* namespace pbrt */

@@ -11,6 +11,7 @@
 
 #include "geometry.hpp"
 #include "pbrt.hpp"
+#include "transform.hpp"
 
 namespace pbrt {
 
