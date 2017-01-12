@@ -388,6 +388,85 @@ class Transform {
     friend class AnimatedTransform;
 };
 
+struct Interval
+{
+    Float low, high;
+
+    Interval( Float v ) : low{ v }, high{ v } {}
+    Interval( Float v0, Float v1 ) : low{ v0 }, high{ v1 } {}
+
+    Interval operator+( const Interval& i ) const { return Interval( low + i.low, high + i.high ); }
+
+    Interval operator-( const Interval& i ) const { return Interval( low - i.high, high - i.low ); }
+
+    Interval operator*( const Interval& i ) const
+    {
+        return Interval( std::min( std::min( low * i.low, high * i.low ),
+                                   std::min( low * i.high, high * i.high ) ),
+                         std::max( std::max( low * i.low, high * i.low ),
+                                   std::max( low * i.high, high * i.high ) ) );
+    }
+};
+
+inline Interval Sin( const Interval& i )
+{
+    Float sinLow = std::sin( i.low ), sinHigh = std::sin( i.high );
+    if ( sinLow > sinHigh )
+        std::swap( sinLow, sinHigh );
+    if ( i.low < Pi / 2 && i.high > Pi / 2 )
+        sinHigh = 1.;
+    if ( i.low < ( 3.f / 2.f ) * Pi && i.high > ( 3.f / 2.f ) * Pi )
+        sinLow = -1.;
+    return Interval( sinLow, sinHigh );
+}
+
+inline Interval Cos( const Interval& i )
+{
+    Float cosLow = std::cos( i.low ), cosHigh = std::cos( i.high );
+    if ( cosLow > cosHigh )
+        std::swap( cosLow, cosHigh );
+    if ( i.low < Pi / 2 && i.high > Pi / 2 )
+        cosHigh = 1.;
+    if ( i.low < ( 3.f / 2.f ) * Pi && i.high > ( 3.f / 2.f ) * Pi )
+        cosLow = -1.;
+    return Interval( cosLow, cosHigh );
+}
+
+void IntervalFindZeros( Float c1, Float c2, Float c3, Float c4, Float c5, Float theta,
+                        Interval tInterval, Float* zeros, int* zeroCount, int depth = 8 )
+{
+    // evaluate motion derivative in interval form, return if no zeros:
+    Interval range =
+      Interval( c1 ) +
+      ( Interval( c2 ) + Interval( c3 ) * tInterval ) * Cos( Interval( 2 * theta ) * tInterval ) +
+      ( Interval( c4 ) + Interval( c5 ) * tInterval ) * Sin( Interval( 2 * theta ) * tInterval );
+    if ( range.low > 0. || range.high < 0. || range.low == range.high )
+        return;
+    if ( depth > 0 ) {
+        // split tInterval and check both resulting intervalsx
+        Float mid = ( tInterval.low + tInterval.high ) * .5f;
+        IntervalFindZeros( c1, c2, c3, c4, c5, theta, Interval( tInterval.low, mid ), zeros,
+                           zeroCount, depth - 1 );
+        IntervalFindZeros( c1, c2, c3, c4, c5, theta, Interval( mid, tInterval.high ), zeros,
+                           zeroCount, depth - 1 );
+    } else {
+        // use newton's method to refine zero
+        Float tNewton = ( tInterval.low + tInterval.high ) * .5f;
+        for ( auto i = 0; i < 4; ++i ) {
+            Float fNewton = c1 + ( c2 + c3 * tNewton ) * std::cos( 2.f * theta * tNewton ) +
+                            ( c4 + c5 * tNewton ) * std::sin( 2.f * theta * tNewton );
+            Float fPrimeNewton =
+              ( c3 + 2 * ( c4 + c5 * tNewton ) * theta ) * std::cos( 2.f * tNewton * theta ) +
+              ( c5 - 2 * ( c2 + c3 * tNewton ) * theta ) * std::sin( 2.f * tNewton * theta );
+            if ( fNewton == 0 || fPrimeNewton == 0 )
+                break;
+            tNewton = tNewton - fNewton / fPrimeNewton;
+        }
+        zeros[ *zeroCount ] = tNewton;
+        ++( *zeroCount );
+    }
+}
+
 class AnimatedTransform {
   public:
     AnimatedTransform( const Transform* startTransform, Float startTime,
@@ -402,15 +481,26 @@ class AnimatedTransform {
     Vector3f operator()( const Vector3f& v ) const;
 
     Bounds3f MotionBounds( const Bounds3f& b ) const;
+    Bounds3f BoundPointMotion( const Point3f& p ) const;
 
   private:
+    struct DerivativeTerm
+    {
+        Float kc, kx, ky, kz;
+
+        DerivativeTerm( Float c, Float x, Float y, Float z ) : kc{ c }, kx{ x }, ky{ y }, kz{ z } {}
+
+        Float Eval( const Point3f& p ) const { return kc + kx * p.x + ky * p.y + kz * p.z; }
+    };
+
     const Transform* startTransform;
     const Transform* endTransform;
     const Float startTime, endTime;
-    const bool actuallyAnimated;
     Vector3f T[ 2 ];
     Quaternion R[ 2 ];
     Matrix4x4 S[ 2 ];
+    DerivativeTerm c1[ 3 ], c2[ 3 ], c3[ 3 ], c4[ 4 ], c5[ 3 ];
+    const bool actuallyAnimated;
     bool hasRotation;
 };
 

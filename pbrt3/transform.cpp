@@ -8,7 +8,7 @@
 
 #include "transform.hpp"
 
-using namespace pbrt;
+namespace pbrt {
 
 Matrix4x4::Matrix4x4( const Float mat[ 4 ][ 4 ] ) { memcpy( m, mat, 16 * sizeof( Float ) ); }
 
@@ -233,3 +233,50 @@ void AnimatedTransform::Interpolate( Float time, Transform* t ) const
     // compute interpolated matrix as product of interpolated components
     *t = t->Translate( trans ) * rotate.ToTransform() * Transform( scale );
 }
+
+Ray AnimatedTransform::operator()( const Ray& r ) const { return Ray{}; }
+
+RayDifferential AnimatedTransform::operator()( const RayDifferential& r ) const
+{
+    return RayDifferential{};
+}
+
+Point3f AnimatedTransform::operator()( const Point3f& p ) const { return Point3f{}; }
+
+Vector3f AnimatedTransform::operator()( const Vector3f& v ) const { return Vector3f{}; }
+
+Bounds3f AnimatedTransform::MotionBounds( const Bounds3f& b ) const
+{
+    if ( !actuallyAnimated )
+        return ( *startTransform )( b );
+    if ( !hasRotation )
+        return Union( ( *startTransform )( b ), ( *endTransform )( b ) );
+    // otherwise return motion bounds accounting for animated rotateion:
+    Bounds3f bounds;
+    for ( auto corner = 0; corner < 8; ++corner )
+        bounds = Union( bounds, BoundPointMotion( b.Corner( corner ) ) );
+    return bounds;
+}
+
+Bounds3f AnimatedTransform::BoundPointMotion( const Point3f& p ) const
+{
+    Bounds3f bounds( ( *startTransform )( p ), ( *endTransform )( p ) );
+    Float cosTheta = Dot( R[ 0 ], R[ 1 ] );
+    Float theta = std::acos( Clamp( cosTheta, -1, 1 ) );
+    for ( auto c = 0; c < 3; ++c ) {
+        // find any motion derivative zeros for the component c
+        Float zeros[ 4 ];
+        int nZeros = 0;
+        IntervalFindZeros( c1[ c ].Eval( p ), c2[ c ].Eval( p ), c3[ c ].Eval( p ),
+                           c4[ c ].Eval( p ), c5[ c ].Eval( p ), theta, Interval( 0., 1. ), zeros,
+                           &nZeros );
+        // expand bounding box for any motion derivative zeros found
+        for ( auto i = 0; i < nZeros; ++i ) {
+            Point3f pz = ( *this )( Lerp( zeros[ i ], startTime, endTime ), p );
+            bounds = Union( bounds, pz );
+        }
+    }
+    return bounds;
+}
+
+} /* namespace pbrt */
