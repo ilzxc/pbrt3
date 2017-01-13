@@ -19,6 +19,7 @@
 		9B0724581E21656C00DBECCF /* shape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B0724561E21656C00DBECCF /* shape.cpp */; };
 		9B07245C1E217ED400DBECCF /* sphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B07245A1E217ED400DBECCF /* sphere.cpp */; };
 		9B07245F1E219C7B00DBECCF /* efloat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B07245D1E219C7B00DBECCF /* efloat.cpp */; };
+		9BED750D1E28AA5100067AE1 /* interaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BED750B1E28AA5100067AE1 /* interaction.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -61,6 +62,8 @@
 		9B07245B1E217ED400DBECCF /* sphere.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sphere.hpp; path = shapes/sphere.hpp; sourceTree = "<group>"; };
 		9B07245D1E219C7B00DBECCF /* efloat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = efloat.cpp; sourceTree = "<group>"; };
 		9B07245E1E219C7B00DBECCF /* efloat.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = efloat.hpp; sourceTree = "<group>"; };
+		9BED750B1E28AA5100067AE1 /* interaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interaction.cpp; sourceTree = "<group>"; };
+		9BED750C1E28AA5100067AE1 /* interaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = interaction.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +124,8 @@
 				9B0723AD1E201B2D00DBECCF /* transform.hpp */,
 				9B0724561E21656C00DBECCF /* shape.cpp */,
 				9B0724571E21656C00DBECCF /* shape.hpp */,
+				9BED750B1E28AA5100067AE1 /* interaction.cpp */,
+				9BED750C1E28AA5100067AE1 /* interaction.hpp */,
 			);
 			name = core;
 			sourceTree = "<group>";
@@ -221,6 +226,7 @@
 				9B0723BD1E205FB700DBECCF /* memory.cpp in Sources */,
 				9B07245F1E219C7B00DBECCF /* efloat.cpp in Sources */,
 				9B0723B71E205EE100DBECCF /* progressreporter.cpp in Sources */,
+				9BED750D1E28AA5100067AE1 /* interaction.cpp in Sources */,
 				9B0724551E20CAEA00DBECCF /* quaternion.cpp in Sources */,
 				9B0723911E1CE0EF00DBECCF /* main.cpp in Sources */,
 				9B0723B41E205E8C00DBECCF /* error.cpp in Sources */,

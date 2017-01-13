@@ -9,6 +9,7 @@
 #include "sphere.hpp"
 #include "efloat.hpp"
 #include "geometry.hpp"
+#include "interaction.hpp"
 #include "transform.hpp"
 
 namespace pbrt {
@@ -127,6 +128,7 @@ bool Sphere::Intersect( const Ray& r, Float* tHit, SurfaceInteraction* isect,
     Normal3f dndv =
       Normal3f{ ( g * F - f * G ) * invEGF2 * dpdu + ( f * F - g * E ) * invEGF2 * dpdv };
     // initialize SurfaceInteraction from parametric information
+    Vector3f pError;
     *isect = ( *ObjectToWorld )( SurfaceInteraction{ pHit, pError, Point2f( u, v ), -ray.d, dpdu,
                                                      dpdv, dndu, dndv, ray.time, this } );
     // update tHit for quadric intersection

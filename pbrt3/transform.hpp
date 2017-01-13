@@ -376,6 +376,8 @@ class Transform {
     }
 
     Bounds3f operator()( const Bounds3f& b ) const;
+    SurfaceInteraction operator()( const SurfaceInteraction& si ) const;
+
     Transform operator*( const Transform& t2 ) const;
     bool operator==( const Transform& t2 ) const;
     bool operator!=( const Transform& t2 ) const;
@@ -488,6 +490,7 @@ class AnimatedTransform {
     {
         Float kc, kx, ky, kz;
 
+        DerivativeTerm() {}
         DerivativeTerm( Float c, Float x, Float y, Float z ) : kc{ c }, kx{ x }, ky{ y }, kz{ z } {}
 
         Float Eval( const Point3f& p ) const { return kc + kx * p.x + ky * p.y + kz * p.z; }

@@ -7,6 +7,7 @@
 //
 
 #include "shape.hpp"
+#include "interaction.hpp"
 #include "transform.hpp"
 
 namespace pbrt {
@@ -16,10 +17,17 @@ Shape::Shape( const Transform* objectToWorld, const Transform* worldToObject,
 : ObjectToWorld{ objectToWorld },
   WorldToObject{ worldToObject },
   reverseOrientation{ reverseOrientation },
-  transformSwapsHandidness{ ObjectToWorld->SwapsHandedness() }
+  transformSwapsHandedness{ ObjectToWorld->SwapsHandedness() }
 {
 }
 
 Bounds3f Shape::WorldBound() const { return ( *ObjectToWorld )( ObjectBound() ); }
+
+bool Shape::IntersectP( const Ray& ray, bool testAlphaTexture ) const
+{
+    Float tHit = ray.tMax;
+    SurfaceInteraction isect;
+    return Intersect( ray, &tHit, &isect, testAlphaTexture );
+}
 
 } /* namespace pbrt */

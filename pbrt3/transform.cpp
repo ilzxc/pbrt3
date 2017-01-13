@@ -7,6 +7,7 @@
 //
 
 #include "transform.hpp"
+#include "interaction.hpp"
 
 namespace pbrt {
 
@@ -129,6 +130,14 @@ Transform Transform::LookAt( const Point3f& pos, const Point3f& look, const Vect
     cameraToWorld.m[ 3 ][ 3 ] = 1;
 
     return Transform( Inverse( cameraToWorld ), cameraToWorld );
+}
+
+SurfaceInteraction Transform::operator()( const SurfaceInteraction& si ) const
+{
+    SurfaceInteraction ret;
+    // transform p and pError in SurfaceInteraction
+    // transform reamining members of SurfaceInteraction
+    return ret;
 }
 
 Transform Transform::operator*( const Transform& t2 ) const

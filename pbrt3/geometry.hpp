@@ -613,6 +613,10 @@ template < typename T > struct Normal3
         // Assert( ! HasNaNs() );
     }
 
+    bool operator==( const Normal3< T >& n ) const { return x == n.x && y == n.y && z == n.z; }
+
+    bool operator!=( const Normal3< T >& n ) const { return x != n.x || y != n.y || z != n.z; }
+
     Normal3< T > operator+( const Normal3< T >& n ) const
     {
         return Normal3( x + n.x, y + n.y, z + n.z );
@@ -1021,7 +1025,7 @@ template < typename T > struct Bounds3
 
 template < typename T > Bounds3< T > Union( const Bounds3< T >& b, const Point3< T >& p )
 {
-    return Bounds3< T >( Point3< T >( std::min( b.pmin.x, p.x ), std::min( b.pMin.y, p.y ),
+    return Bounds3< T >( Point3< T >( std::min( b.pMin.x, p.x ), std::min( b.pMin.y, p.y ),
                                       std::min( b.pMin.z, p.z ) ),
                          Point3< T >( std::max( b.pMax.x, p.x ), std::max( b.pMax.y, p.y ),
                                       std::max( b.pMax.z, p.z ) ) );
@@ -1030,7 +1034,7 @@ template < typename T > Bounds3< T > Union( const Bounds3< T >& b, const Point3<
 template < typename T > Bounds3< T > Union( const Bounds3< T >& b1, const Bounds3< T >& b2 )
 {
     return Bounds3< T >(
-      Point3< T >( std::min( b1.pmin.x, b2.pMin.x ), std::min( b1.pMin.y, b2.pMin.y ),
+      Point3< T >( std::min( b1.pMin.x, b2.pMin.x ), std::min( b1.pMin.y, b2.pMin.y ),
                    std::min( b1.pMin.z, b2.pMin.z ) ),
       Point3< T >( std::max( b1.pMax.x, b2.pMax.x ), std::max( b1.pMax.y, b2.pMax.y ),
                    std::max( b1.pMax.z, b2.pMax.z ) ) );

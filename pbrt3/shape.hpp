@@ -25,17 +25,12 @@ struct Shape
     Bounds3f WorldBound() const;
     virtual bool Intersect( const Ray& ray, Float* tHit, SurfaceInteraction* isect,
                             bool testAlphaTexture = true ) const = 0;
-    virtual bool IntersectP( const Ray& ray, bool testAlphaTexture = true ) const
-    {
-        Float tHit = ray.tMax;
-        SurfaceInteraction isect;
-        return Intersect( ray, &tHit, &isect, testAlphaTexture );
-    }
+    virtual bool IntersectP( const Ray& ray, bool testAlphaTexture = true ) const;
 
     const Transform* ObjectToWorld;
     const Transform* WorldToObject;
     const bool reverseOrientation;
-    const bool transformSwapsHandidness;
+    const bool transformSwapsHandedness;
 };
 
 } /* namespace pbrt */
