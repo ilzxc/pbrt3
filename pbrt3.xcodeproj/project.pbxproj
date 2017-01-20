@@ -24,6 +24,7 @@
 		9B9C063D1E2E0F62002AFD3B /* cone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9C063B1E2E0F62002AFD3B /* cone.cpp */; };
 		9B9C06401E2E0F72002AFD3B /* paraboloid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9C063E1E2E0F72002AFD3B /* paraboloid.cpp */; };
 		9B9C06431E2E0F80002AFD3B /* hyperboloid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9C06411E2E0F80002AFD3B /* hyperboloid.cpp */; };
+		9BB2D7671E31D91400229F63 /* trianglemesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB2D7651E31D91400229F63 /* trianglemesh.cpp */; };
 		9BED750D1E28AA5100067AE1 /* interaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BED750B1E28AA5100067AE1 /* interaction.cpp */; };
 /* End PBXBuildFile section */
 
@@ -77,6 +78,8 @@
 		9B9C063F1E2E0F72002AFD3B /* paraboloid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = paraboloid.hpp; path = shapes/paraboloid.hpp; sourceTree = "<group>"; };
 		9B9C06411E2E0F80002AFD3B /* hyperboloid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hyperboloid.cpp; path = shapes/hyperboloid.cpp; sourceTree = "<group>"; };
 		9B9C06421E2E0F80002AFD3B /* hyperboloid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = hyperboloid.hpp; path = shapes/hyperboloid.hpp; sourceTree = "<group>"; };
+		9BB2D7651E31D91400229F63 /* trianglemesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = trianglemesh.cpp; path = shapes/trianglemesh.cpp; sourceTree = "<group>"; };
+		9BB2D7661E31D91400229F63 /* trianglemesh.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = trianglemesh.hpp; path = shapes/trianglemesh.hpp; sourceTree = "<group>"; };
 		9BED750B1E28AA5100067AE1 /* interaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interaction.cpp; sourceTree = "<group>"; };
 		9BED750C1E28AA5100067AE1 /* interaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = interaction.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -182,6 +185,8 @@
 				9B9C063F1E2E0F72002AFD3B /* paraboloid.hpp */,
 				9B9C06411E2E0F80002AFD3B /* hyperboloid.cpp */,
 				9B9C06421E2E0F80002AFD3B /* hyperboloid.hpp */,
+				9BB2D7651E31D91400229F63 /* trianglemesh.cpp */,
+				9BB2D7661E31D91400229F63 /* trianglemesh.hpp */,
 			);
 			name = shapes;
 			sourceTree = "<group>";
@@ -251,6 +256,7 @@
 				9B0723BD1E205FB700DBECCF /* memory.cpp in Sources */,
 				9B9C06431E2E0F80002AFD3B /* hyperboloid.cpp in Sources */,
 				9B07245F1E219C7B00DBECCF /* efloat.cpp in Sources */,
+				9BB2D7671E31D91400229F63 /* trianglemesh.cpp in Sources */,
 				9B0723B71E205EE100DBECCF /* progressreporter.cpp in Sources */,
 				9B9C063D1E2E0F62002AFD3B /* cone.cpp in Sources */,
 				9B7198DF1E2B4A7A00454EA2 /* cylinder.cpp in Sources */,
