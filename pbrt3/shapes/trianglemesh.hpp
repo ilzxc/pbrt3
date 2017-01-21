@@ -49,6 +49,14 @@ class Triangle : public Shape {
 
     void GetUVs( Point2f uv[ 3 ] ) const;
 
+    Float Area() const
+    {
+        const Point3f& p0 = mesh->p[ v[ 0 ] ];
+        const Point3f& p1 = mesh->p[ v[ 1 ] ];
+        const Point3f& p2 = mesh->p[ v[ 2 ] ];
+        return 0.5f * Cross( p1 - p0, p2 - p0 ).Length();
+    }
+
   private:
     std::shared_ptr< TriangleMesh > mesh;
     const int* v; // vertex index

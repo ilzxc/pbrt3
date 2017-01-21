@@ -189,6 +189,48 @@ bool Triangle::Intersect( const Ray& ray, Float* tHit, SurfaceInteraction* isect
     isect->n = isect->shading.n = Normal3f{ Normalize( Cross( dp02, dp12 ) ) };
     if ( mesh->n || mesh->s ) {
         // initialize Triangle shading geometry
+        //      compute sharing normal ns for triangle
+        Normal3f ns;
+        if ( mesh->n )
+            ns =
+              Normalize( b0 * mesh->n[ v[ 0 ] ] + b1 * mesh->n[ v[ 1 ] ] + b2 * mesh->n[ v[ 2 ] ] );
+        else
+            ns = isect->n;
+        //      compute shading tangent ss for triangle
+        Vector3f ss;
+        if ( mesh->s )
+            ss =
+              Normalize( b0 * mesh->s[ v[ 0 ] ] + b1 * mesh->s[ v[ 1 ] ] + b2 * mesh->s[ v[ 2 ] ] );
+        else
+            ss = Normalize( isect->dpdu );
+        //      compute shading bitangent ts for triangle and adjust ss
+        Vector3f ts = Cross( ss, static_cast< Vector3f >( ns ) );
+        if ( ts.LengthSquared() > 0.f ) {
+            ts = Normalize( ts );
+            ss = Cross( ts, static_cast< Vector3f >( ns ) );
+        } else {
+            CoordinateSystem( static_cast< Vector3f >( ns ), &ss, &ts );
+        }
+        //      compute dn/du and dn/dv for triangle shading geometry
+        Normal3f dndu, dndv;
+        if ( mesh->n ) {
+            // Compute deltas for triangle partial derivatives of normal
+            Vector2f duv02 = uv[ 0 ] - uv[ 2 ];
+            Vector2f duv12 = uv[ 1 ] - uv[ 2 ];
+            Normal3f dn1 = mesh->n[ v[ 0 ] ] - mesh->n[ v[ 2 ] ];
+            Normal3f dn2 = mesh->n[ v[ 1 ] ] - mesh->n[ v[ 2 ] ];
+            Float determinant = duv02[ 0 ] * duv12[ 1 ] - duv02[ 1 ] * duv12[ 0 ];
+            bool degenerateUV = std::abs( determinant ) < 1e-8;
+            if ( degenerateUV )
+                dndu = dndv = Normal3f( 0, 0, 0 );
+            else {
+                Float invDet = 1 / determinant;
+                dndu = ( duv12[ 1 ] * dn1 - duv02[ 1 ] * dn2 ) * invDet;
+                dndv = ( -duv12[ 0 ] * dn1 + duv02[ 0 ] * dn2 ) * invDet;
+            }
+        } else
+            dndu = dndv = Normal3f( 0, 0, 0 );
+        isect->SetShadingGeometry( ss, ts, dndu, dndv, true );
     }
     // ensure correct orientation of the geometric normal
     if ( mesh->n )
